@@ -1,107 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Location Access Required</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>السماح بالموقع</title>
+
 <style>
-  body {
-    font-family: sans-serif;
-    background: #0b0c0e;
-    color: #e8eaf0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    flex-direction: column;
-    text-align: center;
-  }
 
-  #message-card {
-    background: #13151a;
-    padding: 40px 30px;
-    border-radius: 12px;
-    border: 1px solid #1e2028;
-    max-width: 400px;
-  }
+body{
+margin:0;
+font-family:system-ui,-apple-system,Segoe UI,Roboto;
+background:#0f0f0f;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
 
-  #message-card h1 {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-  }
+.card{
+width:90%;
+max-width:420px;
+background:#1c1c1c;
+border-radius:14px;
+padding:25px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
 
-  #message-card p {
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-  }
+h1{
+font-size:18px;
+margin-bottom:10px;
+}
 
-  #retry-btn {
-    padding: 10px 20px;
-    background: #4fffb0;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-  }
+p{
+font-size:14px;
+color:#b3b3b3;
+line-height:1.6;
+}
 
-  #retry-btn:hover {
-    background: #38c48a;
-  }
+button{
+margin-top:20px;
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#3ea6ff;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:active{
+opacity:0.85;
+}
+
 </style>
 </head>
+
 <body>
 
-<div id="message-card">
-  <h1>الرجاء السماح باستخدام الموقع الجغرافي</h1>
-  <p>يحتاج الموقع إلى تحديد موقعك الجغرافي للاستمرار. اضغط على الزر أدناه للسماح بالوصول.</p>
-  <button id="retry-btn">المحاولة مرة أخرى</button>
+<div class="card">
+
+<h1>السماح باستخدام الموقع الجغرافي</h1>
+
+<p>
+يحتاج هذا الموقع إلى معرفة موقعك الجغرافي لتحسين الخدمة.
+الرجاء الضغط على الزر أدناه والسماح بالوصول إلى الموقع عند ظهور الطلب.
+</p>
+
+<button onclick="requestLocation()">السماح بالموقع</button>
+
 </div>
 
 <script>
-const REDIRECT_URL = "https://youtube.com/@mohannad_asas";
 
-// إخفاء الرسالة أثناء المحاولة
-const messageCard = document.getElementById('message-card');
-const retryBtn = document.getElementById('retry-btn');
+function requestLocation(){
 
-function requestLocation() {
-    messageCard.style.display = 'none'; // إخفاء البطاقة أثناء طلب الموقع
-
-    if (!navigator.geolocation) {
-        showMessage("المتصفح الخاص بك لا يدعم تحديد الموقع.");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: true, timeout: 10000 });
+if(!navigator.geolocation){
+alert("المتصفح لا يدعم تحديد الموقع");
+return;
 }
 
-function onSuccess(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
+navigator.geolocation.getCurrentPosition(function(pos){
 
-    console.log("Latitude:", latitude, "Longitude:", longitude);
+console.log(pos.coords.latitude,pos.coords.longitude);
 
-    // إعادة التوجيه بعد الحصول على الموقع
-    window.location.href = REDIRECT_URL;
+},function(){
+
+alert("لم يتم السماح بالموقع");
+
+});
+
 }
 
-function onError(error) {
-    let message = "حدث خطأ أثناء تحديد الموقع. يرجى السماح بالوصول.";
-    if(error.code === error.PERMISSION_DENIED) message = "تم رفض الوصول إلى الموقع. الرجاء السماح باستخدام الموقع.";
-    if(error.code === error.POSITION_UNAVAILABLE) message = "الموقع غير متوفر. تحقق من إعدادات جهازك.";
-    if(error.code === error.TIMEOUT) message = "انتهت مهلة الطلب. حاول مرة أخرى.";
-
-    showMessage(message);
-}
-
-function showMessage(msg) {
-    messageCard.style.display = 'block';
-    messageCard.querySelector('p').innerText = msg;
-}
-
-retryBtn.addEventListener('click', requestLocation);
-
-// بدء الطلب عند تحميل الصفحة
-window.onload = requestLocation;
 </script>
 
 </body>
